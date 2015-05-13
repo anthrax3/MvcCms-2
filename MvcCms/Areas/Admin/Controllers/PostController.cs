@@ -22,7 +22,8 @@ namespace MvcCms.Areas.Admin.Controllers
         // GET: Admin/Post
         public ActionResult Index()
         {
-            return View();
+            var posts = _repository.GetAll();
+            return View(posts);
         }
 
         // /admin/post/create
@@ -46,16 +47,18 @@ namespace MvcCms.Areas.Admin.Controllers
                 return View(model);
             }
 
+            _repository.Create(model);
+
             return View(model);
         }
 
         // /admin/post/edit/post-to-edit
         [HttpGet]
-        [Route("edit/{id}")]
-        public ActionResult Edit(string id)
+        [Route("edit/{postId}")]
+        public ActionResult Edit(string postId)
         {
            // TODO: to retrieve the model from the data store            
-            var post = _repository.Get(id);
+            var post = _repository.Get(postId);
 
             if(post == null)
             {
@@ -67,14 +70,21 @@ namespace MvcCms.Areas.Admin.Controllers
 
         // /admin/post/edit/post-to-edit
         [HttpPost]
-        [Route("edit/{id}")]
+        [Route("edit/{postId}")]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Post model)
+        public ActionResult Edit(string postId, Post model)
         {
+            var post = _repository.Get(postId);
+            if(post == null)
+            {
+                return HttpNotFound();
+            }
             if(!ModelState.IsValid)
             {
                 return View(model);
             }
+
+            _repository.Edit(postId, model);
 
             // TODO: update data model in data store
 
