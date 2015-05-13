@@ -89,6 +89,48 @@ namespace MvcCms.Tests.Admin.Controllers
 
             Mock.Assert(repo);
             Assert.IsTrue(result is RedirectToRouteResult);
+        }        
+
+        [TestMethod]
+        public void Create_PostRequestErrorModelState()
+        {            
+            var repo = Mock.Create<IPostRepository>();
+            var controller = new PostController(repo);
+            controller.ViewData.ModelState.AddModelError("key", "error message");
+
+            var result = (ViewResult)controller.Create(new Post{Id = "test-id"});
+            var model = (Post)result.Model;
+
+            Assert.AreEqual("test-id", model.Id);
+        }
+
+        [TestMethod]
+        public void Create_PostRequestCallsCreateSendPostToView()
+        {
+            var repo = Mock.Create<IPostRepository>();
+            var controller = new PostController(repo);
+
+            Mock.Arrange(() => repo.Create(Arg.IsAny<Post>()))
+                .MustBeCalled();
+
+            var result = (ViewResult)controller.Create(new Post { Id = "test-id" });
+
+            Mock.Assert(repo);
+            var model = (Post)result.Model;
+
+            Assert.AreEqual("test-id", model.Id);
+        }
+
+        [TestMethod]
+        public void Create_GetRequestSendsModelToView()
+        {            
+            var repo = Mock.Create<IPostRepository>();
+            var controller = new PostController(repo);            
+
+            var result = (ViewResult)controller.Create();
+            var model = result.Model;
+
+            Assert.IsTrue(model is Post);
         }
     }
 }
