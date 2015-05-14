@@ -32,7 +32,7 @@ namespace MvcCms.Areas.Admin.Controllers
                 return HttpNotFound();
             }
 
-            return View(tag);
+            return View(model: tag);
         }
 
         [HttpPost]
@@ -56,7 +56,7 @@ namespace MvcCms.Areas.Admin.Controllers
             {
                 ModelState.AddModelError("key", "New tag value cannot ve empty");
                 
-                return View(tag);
+                return View(model: tag);
             }
 
             _repository.Edit(tag, newTag);
@@ -72,7 +72,7 @@ namespace MvcCms.Areas.Admin.Controllers
                 return HttpNotFound();
             }
 
-            return View(tag);
+            return View(model: tag);
         }
 
         [HttpPost]
