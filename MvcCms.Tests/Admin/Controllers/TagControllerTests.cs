@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Web.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MvcCms.Areas.Admin.Controllers;
@@ -17,8 +18,8 @@ namespace MvcCms.Tests.Admin.Controllers
             var repo = Mock.Create<ITagRepository>();
             var controller = new TagController(repo);
 
-            //Mock.Arrange(() => repo.Exists(tag))
-            //    .Returns(true);
+            Mock.Arrange(() => repo.Get(tag))
+                .Returns(tag.ToLower());
 
             var result = (ViewResult)controller.Edit(tag);
             var model = (string) result.Model;
@@ -32,8 +33,8 @@ namespace MvcCms.Tests.Admin.Controllers
             var tag = "my tag";
             var repo = Mock.Create<ITagRepository>();
             var controller = new TagController(repo);
-            //Mock.Arrange(() => repo.Exists(tag))
-            //    .Returns(false);
+            Mock.Arrange(() => repo.Get(tag))
+                .Throws(new KeyNotFoundException());
 
             var result = controller.Edit(tag);            
 

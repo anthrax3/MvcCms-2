@@ -30,7 +30,7 @@ namespace MvcCms.Areas.Admin.Controllers
             try
             {
                 var model = _repository.Get(tag);
-                return View(model);
+                return View(model: model);
             }
             catch(KeyNotFoundException)
             {

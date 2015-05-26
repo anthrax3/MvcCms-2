@@ -77,8 +77,7 @@ namespace MvcCms.Areas.Admin.Controllers
         [HttpGet]
         [Route("edit/{postId}")]
         public ActionResult Edit(string postId)
-        {
-           // TODO: to retrieve the model from the data store            
+        {                      
             var post = _repository.Get(postId);
 
             if(post == null)
