@@ -17,8 +17,8 @@ namespace MvcCms.Tests.Admin.Controllers
             var repo = Mock.Create<ITagRepository>();
             var controller = new TagController(repo);
 
-            Mock.Arrange(() => repo.Exists(tag))
-                .Returns(true);
+            //Mock.Arrange(() => repo.Exists(tag))
+            //    .Returns(true);
 
             var result = (ViewResult)controller.Edit(tag);
             var model = (string) result.Model;
@@ -32,8 +32,8 @@ namespace MvcCms.Tests.Admin.Controllers
             var tag = "my tag";
             var repo = Mock.Create<ITagRepository>();
             var controller = new TagController(repo);
-            Mock.Arrange(() => repo.Exists(tag))
-                .Returns(false);
+            //Mock.Arrange(() => repo.Exists(tag))
+            //    .Returns(false);
 
             var result = controller.Edit(tag);            
 

@@ -27,12 +27,15 @@ namespace MvcCms.Areas.Admin.Controllers
         [HttpGet]
         public ActionResult Edit(string tag)
         {
-            if(!_repository.Exists(tag))
+            try
+            {
+                var model = _repository.Get(tag);
+                return View(model);
+            }
+            catch(KeyNotFoundException)
             {
                 return HttpNotFound();
-            }
-
-            return View(model: tag);
+            }                                 
         }
 
         [HttpPost]
@@ -67,26 +70,31 @@ namespace MvcCms.Areas.Admin.Controllers
         [HttpGet]
         public ActionResult Delete(string tag)
         {
-            if (!_repository.Exists(tag))
+            try
+            {
+                var model = _repository.Get(tag);
+                return View(model);
+            }
+            catch (KeyNotFoundException)
             {
                 return HttpNotFound();
-            }
-
-            return View(model: tag);
+            } 
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Delete(string tag, bool foo)
-        {              
-            if (!_repository.Exists(tag))
+        {
+            try
+            {
+                _repository.Delete(tag);
+
+                return RedirectToAction("index");
+            }
+            catch (KeyNotFoundException)
             {
                 return HttpNotFound();
-            }                        
-
-            _repository.Delete(tag);
-
-            return RedirectToAction("index");
+            }
         }
     }
 }
