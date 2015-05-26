@@ -124,5 +124,37 @@ namespace MvcCms.Areas.Admin.Controllers
                 return View(model);
             }
         }
+
+        [HttpGet]
+        [Route("delete/{postId}")]
+        public ActionResult Delete(string postId)
+        {            
+            var post = _repository.Get(postId);
+
+            if (post == null)
+            {
+                return HttpNotFound();
+            }
+
+            return View(post);
+        }
+
+        // /admin/post/edit/post-to-edit
+        [HttpPost]
+        [Route("delete/{postId}")]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(string postId, string dummy)
+        {            
+            try
+            {
+                _repository.Delete(postId);
+
+                return RedirectToAction("index");
+            }
+            catch (KeyNotFoundException)
+            {
+                return HttpNotFound();
+            }            
+        }
     }
 }
