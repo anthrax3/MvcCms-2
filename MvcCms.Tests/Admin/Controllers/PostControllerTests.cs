@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Web.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MvcCms.Areas.Admin.Controllers;
@@ -49,11 +50,11 @@ namespace MvcCms.Tests.Admin.Controllers
             var id = "test-post";
             var repo = Mock.Create<IPostRepository>();
             var controller = new PostController(repo);
+            var post = new Post {Id = "Mock Post"};
+            Mock.Arrange(() => repo.Edit(id, post))
+                .Throws(new KeyNotFoundException());            
 
-            Mock.Arrange(() => repo.Get(id))
-                .Returns((Post)null);
-
-            var result = controller.Edit(id, new Post());
+            var result = controller.Edit(id, post);
 
             Assert.IsTrue(result is HttpNotFoundResult);
         }
@@ -113,12 +114,10 @@ namespace MvcCms.Tests.Admin.Controllers
             Mock.Arrange(() => repo.Create(Arg.IsAny<Post>()))
                 .MustBeCalled();
 
-            var result = (ViewResult)controller.Create(new Post { Id = "test-id" });
+            var result = controller.Create(new Post { Id = "test-id" });
 
             Mock.Assert(repo);
-            var model = (Post)result.Model;
-
-            Assert.AreEqual("test-id", model.Id);
+            Assert.IsTrue(result is RedirectToRouteResult);
         }
 
         [TestMethod]
