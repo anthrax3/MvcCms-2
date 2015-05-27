@@ -10,22 +10,24 @@ namespace MvcCms.Data
     {
         public IEnumerable<string> GetAll()
         {
-            using(var db = new CmsContext())
+            using (var db = new CmsContext())
             {
-                return db.Posts.SelectMany(p => p.Tags).Distinct();
+                var tagsCollection = db.Posts.Select(p => p.CombinedTags).ToList();
+                return string.Join(",", tagsCollection).Split(',').Distinct();
             }
         }
 
         public string Get(string tag)
         {
-            using(var db = new CmsContext())
+            using (var db = new CmsContext())
             {
-                var posts =
-                    db.Posts.Where(p =>
-                        p.Tags.Contains(tag, StringComparer.CurrentCultureIgnoreCase))
-                      .ToList();
+                var posts = db.Posts.Where(p => p.CombinedTags.Contains(tag)).ToList();
 
-                if(!posts.Any())
+                posts = posts.Where(p =>
+                            p.Tags.Contains(tag, StringComparer.CurrentCultureIgnoreCase))
+                             .ToList();
+
+                if (!posts.Any())
                 {
                     throw new KeyNotFoundException("The tag " + tag + " does not exist.");
                 }
@@ -36,19 +38,20 @@ namespace MvcCms.Data
 
         public void Edit(string existingTag, string newTag)
         {
-            using(var db = new CmsContext())
+            using (var db = new CmsContext())
             {
-                var posts =
-                    db.Posts.Where(p => 
-                        p.Tags.Contains(existingTag, StringComparer.CurrentCultureIgnoreCase))
-                        .ToList();
+                var posts = db.Posts.Where(p => p.CombinedTags.Contains(existingTag)).ToList();
 
-                if(!posts.Any())
+                posts = posts.Where(p =>
+                            p.Tags.Contains(existingTag, StringComparer.CurrentCultureIgnoreCase))
+                             .ToList();
+
+                if (!posts.Any())
                 {
                     throw new KeyNotFoundException("The tag " + existingTag + " does not exist.");
                 }
 
-                foreach(var post in posts)
+                foreach (var post in posts)
                 {
                     post.Tags.Remove(existingTag);
                     post.Tags.Add(newTag);
@@ -62,10 +65,11 @@ namespace MvcCms.Data
         {
             using (var db = new CmsContext())
             {
-                var posts =
-                    db.Posts.Where(p =>
-                        p.Tags.Contains(tag, StringComparer.CurrentCultureIgnoreCase))
-                        .ToList();
+                var posts = db.Posts.Where(p => p.CombinedTags.Contains(tag)).ToList();
+
+                posts = posts.Where(p =>
+                            p.Tags.Contains(tag, StringComparer.CurrentCultureIgnoreCase))
+                             .ToList();
 
                 if (!posts.Any())
                 {
@@ -74,7 +78,7 @@ namespace MvcCms.Data
 
                 foreach (var post in posts)
                 {
-                    post.Tags.Remove(tag);                    
+                    post.Tags.Remove(tag);
                 }
 
                 db.SaveChanges();

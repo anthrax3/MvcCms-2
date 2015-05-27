@@ -15,12 +15,12 @@
         <h4>Tag</h4>
         <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        @Html.Hidden("tag", Model);
+        @Html.Hidden("tag", Model)
 
         <div class="form-group">
             <label for="newTag" class="form-control"/>
             <div class="col-md-10">
-                @Html.TextBox("newTag", Model);                
+                @Html.TextBox("newTag", Model)            
             </div>
         </div>       
 

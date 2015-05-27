@@ -7,9 +7,15 @@ using MvcCms.Data;
 
 namespace MvcCms.Areas.Admin.Controllers
 {
+    [RouteArea("Admin")]
+    [RoutePrefix("tag")]
     public class TagController : Controller
     {
         private readonly ITagRepository _repository;
+
+        public TagController() : this(new TagRepository())
+        {            
+        }
 
         public TagController(ITagRepository repository)
         {
@@ -17,6 +23,7 @@ namespace MvcCms.Areas.Admin.Controllers
         }
 
         // GET: Admin/Tag
+        [Route("")]
         public ActionResult Index()
         {
             var tags = _repository.GetAll();
@@ -25,6 +32,7 @@ namespace MvcCms.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [Route("edit/{tag}")]
         public ActionResult Edit(string tag)
         {
             try
@@ -40,6 +48,7 @@ namespace MvcCms.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Route("edit/{tag}")]
         public ActionResult Edit(string tag, string newTag)
         {
             var tags = _repository.GetAll();
@@ -68,12 +77,13 @@ namespace MvcCms.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [Route("delete/{tag}")]
         public ActionResult Delete(string tag)
         {
             try
             {
                 var model = _repository.Get(tag);
-                return View(model);
+                return View(model: model);
             }
             catch (KeyNotFoundException)
             {
@@ -83,7 +93,8 @@ namespace MvcCms.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(string tag, bool foo)
+        [Route("delete/{tag}")]
+        public ActionResult Delete(string tag, string foo)
         {
             try
             {

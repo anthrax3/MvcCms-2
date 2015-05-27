@@ -12,10 +12,10 @@
     @Html.AntiForgeryToken()
     
     <div class="form-horizontal">
-        <h4>PoTagst</h4>
+        <h4>Tag</h4>
         <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        @Html.Hidden("tag", Model);       
+        @Html.Hidden("tag", Model)    
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
