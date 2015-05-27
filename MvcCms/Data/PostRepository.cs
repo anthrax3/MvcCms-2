@@ -47,16 +47,9 @@ namespace MvcCms.Data
                 if(post != null)
                 {
                     throw new ArgumentException("A post with id " + model.Id + " already exists.");
-                }
-
-                if(string.IsNullOrWhiteSpace(model.Id))
-                {
-                    model.Id = model.Title;
-                }
-
-                model.Id = model.Id.MakeUrlFriendly();
-                model.Tags = model.Tags.Select(t => t.MakeUrlFriendly()).ToList();
-                db.Posts.Attach(model);
+                }                
+                
+                db.Posts.Add(model);
                 db.SaveChanges();
             }
         }

@@ -10,6 +10,7 @@ namespace MvcCms.Areas.Admin.Controllers
 {
     // /admin/post
     [RouteArea("Admin")]
+    [RoutePrefix("post")]
     public class PostController : Controller
     {
         private readonly IPostRepository _repository;
@@ -26,6 +27,7 @@ namespace MvcCms.Areas.Admin.Controllers
         }
 
         // GET: Admin/Post
+        [Route("")]
         public ActionResult Index()
         {
             var posts = _repository.GetAll();
@@ -58,7 +60,8 @@ namespace MvcCms.Areas.Admin.Controllers
 
             model.Id = model.Id.MakeUrlFriendly();
             model.Tags = model.Tags.Select(t => t.MakeUrlFriendly()).ToList();
-
+            model.Created = DateTime.Now;
+            model.AuthorId = "e31095c2-382f-4a8a-975d-33e809b2da84";
 
             try
             {
@@ -119,7 +122,7 @@ namespace MvcCms.Areas.Admin.Controllers
             }
             catch(Exception e)
             {
-                ModelState.AddModelError("key", e);
+                ModelState.AddModelError(string.Empty, e.Message);
                 return View(model);
             }
         }
@@ -138,7 +141,7 @@ namespace MvcCms.Areas.Admin.Controllers
             return View(post);
         }
 
-        // /admin/post/edit/post-to-edit
+        // /admin/post/delete/post-to-edit
         [HttpPost]
         [Route("delete/{postId}")]
         [ValidateAntiForgeryToken]
