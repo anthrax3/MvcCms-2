@@ -140,9 +140,13 @@
     <Compile Include="Data\CmsContext.cs" />
     <Compile Include="Data\IdentityClasses.cs" />
     <Compile Include="Data\IPostRepository.cs" />
+    <Compile Include="Data\IRoleRepository.cs" />
     <Compile Include="Data\ITagRepository.cs" />
+    <Compile Include="Data\IUserRepository.cs" />
     <Compile Include="Data\PostRepository.cs" />
+    <Compile Include="Data\RoleRepository.cs" />
     <Compile Include="Data\TagRepository.cs" />
+    <Compile Include="Data\UserRepository.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
