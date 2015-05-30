@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
+using MvcCms.Areas.Admin.Services;
 using MvcCms.Areas.Admin.ViewModels;
 using MvcCms.Data;
 
@@ -14,6 +15,17 @@ namespace MvcCms.Areas.Admin.Controllers
     [RoutePrefix("user")]
     public class UserController : Controller
     {
+        private readonly UserRepository _userRepository;
+        private readonly RoleRepository _roleRepository;
+        private readonly UserService _users;
+
+        public UserController()
+        {
+            _userRepository = new UserRepository();
+            _roleRepository = new RoleRepository();
+            _users = new UserService(ModelState, _userRepository, _roleRepository);
+        }
+
         [Route("")]
         public ActionResult Index()
         {
@@ -22,6 +34,28 @@ namespace MvcCms.Areas.Admin.Controllers
                 var users = manager.Users.ToList();
                 return View(users);
             }            
+        }
+
+        [Route("create")]
+        [HttpGet]
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        [Route("create")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create(UserViewModel model)
+        {
+            if(_users.Create(model))
+            {
+                return RedirectToAction("index");
+            }
+            else
+            {
+                return View(model);
+            }
         }
         
         [Route("edit/{username}")]
@@ -122,6 +156,20 @@ namespace MvcCms.Areas.Admin.Controllers
 
                 return RedirectToAction("index");
             }
+        }
+
+        private bool _isDisposed;
+
+        protected override void Dispose(bool disposing)
+        {
+            if(_isDisposed)
+            {
+                _userRepository.Dispose();
+                _roleRepository.Dispose();
+            }
+
+            _isDisposed = true;
+            base.Dispose(disposing);
         }
     }
 }
