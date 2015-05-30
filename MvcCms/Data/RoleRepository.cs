@@ -8,7 +8,7 @@ using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace MvcCms.Data
 {
-    public class RoleRepository : IRoleRepository
+    public class RoleRepository : IRoleRepository, IDisposable
     {
         private readonly RoleStore<IdentityRole> _store;
         private readonly RoleManager<IdentityRole> _manager;
@@ -16,7 +16,7 @@ namespace MvcCms.Data
         public RoleRepository()
         {
             _store = new RoleStore<IdentityRole>();
-            _manager = new RoleManager<IdentityRole>();
+            _manager = new RoleManager<IdentityRole>(_store);
         }
 
         public IdentityRole GetRoleByName(string name)

@@ -7,7 +7,7 @@ using MvcCms.Models;
 
 namespace MvcCms.Data
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository : IUserRepository, IDisposable
     {
         private readonly CmsUserStore _store;
         private readonly CmsUserManager _manager;
@@ -36,6 +36,11 @@ namespace MvcCms.Data
         public void Delete(CmsUser user)
         {
             var result = _manager.DeleteAsync(user).Result;
+        }
+
+        public void Update(CmsUser user)
+        {
+            var result = _manager.UpdateAsync(user).Result;
         }
 
         private bool _disposed = false;
