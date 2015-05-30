@@ -15,11 +15,9 @@ namespace MvcCms.App_Start
     {
         public static void RegisterAdmin()
         {
-            using(var context = new CmsContext())
-            using(var userStore = new UserStore<CmsUser>(context))
-            using(var userManager = new UserManager<CmsUser>(userStore))
+            using(var users = new UserRepository())
             {
-                var user = userStore.FindByNameAsync("admin").Result;
+                var user = users.GetUserByName("admin");
                 if(user == null)
                 {
                     var adminUser = new CmsUser
@@ -28,7 +26,25 @@ namespace MvcCms.App_Start
                         Email = "admin@cms.com",
                         DisplayName = "Administrator"
                     };
-                    userManager.Create(adminUser, "Password1234");
+                    users.Create(adminUser, "Password1234");
+                }
+            }
+
+            using (var roles = new RoleRepository())
+            {
+                if (roles.GetRoleByName("admin") == null)
+                {
+                    roles.Create(new IdentityRole("admin"));
+                }
+
+                if (roles.GetRoleByName("editor") == null)
+                {
+                    roles.Create(new IdentityRole("editor"));
+                }
+
+                if (roles.GetRoleByName("author") == null)
+                {
+                    roles.Create(new IdentityRole("author"));
                 }
             }
         }
