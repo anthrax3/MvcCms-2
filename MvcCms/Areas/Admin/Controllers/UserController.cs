@@ -29,132 +29,81 @@ namespace MvcCms.Areas.Admin.Controllers
         [Route("")]
         public ActionResult Index()
         {
-            using(var manager = new CmsUserManager())
-            {
-                var users = manager.Users.ToList();
-                return View(users);
-            }            
+            var users = _users.GetAllUsers();
+            return View(users);
         }
 
         [Route("create")]
         [HttpGet]
         public ActionResult Create()
         {
-            return View();
+            var model = new UserViewModel();
+            return View(model);
         }
 
         [Route("create")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(UserViewModel model)
+        public async Task<ActionResult> Create(UserViewModel model)
         {
-            if(_users.Create(model))
+            if (await _users.CreateAsync(model))
             {
                 return RedirectToAction("index");
             }
-            else
-            {
-                return View(model);
-            }
+
+            return View(model);
         }
-        
+
         [Route("edit/{username}")]
         [HttpGet]
-        public ActionResult Edit(string username)
+        public async Task<ActionResult> Edit(string username)
         {
-            using(var userStore = new CmsUserStore())
-            using(var userManager = new CmsUserManager(userStore))
+            try
             {
-                var user = userStore.FindByNameAsync(username).Result;
+                var user = await _users.FindByNameAsync(username);
 
-                if(user == null)
-                {
-                    return HttpNotFound();
-                }
-
-                var viewModel = new UserViewModel
-                {
-                    Username = user.UserName,
-                    Email = user.Email
-                };
-
-                return View(viewModel);
+                return View(user);
             }
+            catch (KeyNotFoundException)
+            {
+                return HttpNotFound();
+            }
+
         }
 
         [Route("edit/{username}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(UserViewModel model)
+        public async Task<ActionResult> Edit(UserViewModel model)
         {
-            using (var userStore = new CmsUserStore())
-            using (var userManager = new CmsUserManager(userStore))
+            try
             {
-                var user = userStore.FindByNameAsync(model.Username).Result;
-
-                if (user == null)
-                {
-                    return HttpNotFound();
-                }
-
-                if(!ModelState.IsValid)
-                {
-                    return View(model);
-                }
-
-                if(!string.IsNullOrWhiteSpace(model.NewPassword))
-                {
-                    if(string.IsNullOrWhiteSpace(model.CurrentPassword))
-                    {
-                        ModelState.AddModelError(string.Empty, "The current password must be supplied");
-                        return View(model);
-                    }
-
-                    var passwordVerified = userManager.PasswordHasher.VerifyHashedPassword(user.PasswordHash,
-                        model.CurrentPassword);
-
-                    if(passwordVerified != PasswordVerificationResult.Success)
-                    {
-                        ModelState.AddModelError(string.Empty, "The current password does not match");
-                        return View(model);
-                    }
-
-                    var newHashedPassword = userManager.PasswordHasher.HashPassword(model.NewPassword);
-                    user.PasswordHash = newHashedPassword;
-                }
-
-                user.Email = model.Email;
-                user.DisplayName = model.DisplayName;
-
-                var updateResult = userManager.UpdateAsync(user).Result;
-                if(updateResult.Succeeded)
+                if (await _users.EditAsync(model))
                 {
                     return RedirectToAction("index");
                 }
-
-                ModelState.AddModelError(string.Empty, "An error occurred. Please try again.");
+                
                 return View(model);
+            }
+            catch (KeyNotFoundException)
+            {
+                return HttpNotFound();
             }
         }
 
         [Route("delete/{username}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(string username)
+        public async Task<ActionResult> Delete(string username)
         {
-            using (var userStore = new CmsUserStore())
-            using (var userManager = new CmsUserManager(userStore))
+            try
             {
-                var user = userStore.FindByNameAsync(username).Result;
-
-                if (user == null)
-                {
-                    return HttpNotFound();
-                }
-
-                var deleteResult = userManager.DeleteAsync(user).Result;
-
+                await _users.DeleteAsync(username);
                 return RedirectToAction("index");
+            }
+            catch (KeyNotFoundException)
+            {
+                return HttpNotFound();
             }
         }
 
@@ -162,7 +111,7 @@ namespace MvcCms.Areas.Admin.Controllers
 
         protected override void Dispose(bool disposing)
         {
-            if(_isDisposed)
+            if (_isDisposed)
             {
                 _userRepository.Dispose();
                 _roleRepository.Dispose();

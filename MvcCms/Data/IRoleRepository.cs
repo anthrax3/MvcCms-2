@@ -1,12 +1,13 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace MvcCms.Data
 {
     public interface IRoleRepository
     {
-        IdentityRole GetRoleByName(string name);
-        IEnumerable<IdentityRole> GetAllRoles();
-        void Create(IdentityRole role);
+        Task<IdentityRole> GetRoleByNameAsync(string name);
+        Task<IEnumerable<IdentityRole>> GetAllRolesAsync();
+        Task CreateAsync(IdentityRole role);
     }
 }

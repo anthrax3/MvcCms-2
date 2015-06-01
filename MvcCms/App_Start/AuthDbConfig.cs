@@ -13,11 +13,11 @@ namespace MvcCms.App_Start
 {
     public class AuthDbConfig
     {
-        public static void RegisterAdmin()
+        public async static Task RegisterAdminAsync()
         {
             using(var users = new UserRepository())
             {
-                var user = users.GetUserByName("admin");
+                var user = await users.GetUserByNameAsync("admin");
                 if(user == null)
                 {
                     var adminUser = new CmsUser
@@ -26,25 +26,25 @@ namespace MvcCms.App_Start
                         Email = "admin@cms.com",
                         DisplayName = "Administrator"
                     };
-                    users.Create(adminUser, "Password1234");
-                }
+                    await users.CreateAsync(adminUser, "Password1234");
+                }                           
             }
 
             using (var roles = new RoleRepository())
             {
-                if (roles.GetRoleByName("admin") == null)
+                if (await roles.GetRoleByNameAsync("admin") == null)
                 {
-                    roles.Create(new IdentityRole("admin"));
+                    await roles.CreateAsync(new IdentityRole("admin"));
                 }
 
-                if (roles.GetRoleByName("editor") == null)
+                if (await roles.GetRoleByNameAsync("editor") == null)
                 {
-                    roles.Create(new IdentityRole("editor"));
+                    await roles.CreateAsync(new IdentityRole("editor"));
                 }
 
-                if (roles.GetRoleByName("author") == null)
+                if (await roles.GetRoleByNameAsync("author") == null)
                 {
-                    roles.Create(new IdentityRole("author"));
+                    await roles.CreateAsync(new IdentityRole("author"));
                 }
             }
         }

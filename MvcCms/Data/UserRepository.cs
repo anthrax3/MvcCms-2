@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Identity;
 using MvcCms.Models;
 
 namespace MvcCms.Data
@@ -18,9 +19,9 @@ namespace MvcCms.Data
             _manager = new CmsUserManager();
         }
 
-        public CmsUser GetUserByName(string username)
+        public async Task<CmsUser> GetUserByNameAsync(string username)
         {
-            return _store.FindByNameAsync(username).Result;
+            return await _store.FindByNameAsync(username);
         }
 
         public IEnumerable<CmsUser> GetAllUsers()
@@ -28,22 +29,33 @@ namespace MvcCms.Data
             return _store.Users.ToArray();
         }
 
-        public void Create(CmsUser user, string password)
+        public async Task CreateAsync(CmsUser user, string password)
         {
-            var result = _manager.CreateAsync(user, password).Result;
+            await _manager.CreateAsync(user, password);            
         }
 
-        public void Delete(CmsUser user)
+        public async Task DeleteAsync(CmsUser user)
         {
-            var result = _manager.DeleteAsync(user).Result;
+            await _manager.DeleteAsync(user);
         }
 
-        public void Update(CmsUser user)
+        public async Task UpdateAsync(CmsUser user)
         {
-            var result = _manager.UpdateAsync(user).Result;
+            await _manager.UpdateAsync(user);            
         }
 
-        private bool _disposed = false;
+        public string HashPassword(string newPassword)
+        {
+            return _manager.PasswordHasher.HashPassword(newPassword);
+        }
+
+        public bool VerifyPassword(string passwordHash, string currentPassword)
+        {
+            return _manager.PasswordHasher.VerifyHashedPassword(passwordHash, currentPassword)
+                    == PasswordVerificationResult.Success;
+        }
+
+        private bool _disposed;
 
         public void Dispose()
         {

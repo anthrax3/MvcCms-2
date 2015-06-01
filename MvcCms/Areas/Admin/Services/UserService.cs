@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using System.Web.UI.WebControls;
+using Microsoft.AspNet.Identity;
 using MvcCms.Areas.Admin.ViewModels;
 using MvcCms.Data;
 using MvcCms.Models;
@@ -24,16 +26,49 @@ namespace MvcCms.Areas.Admin.Services
             _roles = roleRepository;
         }
 
-        public bool Create(UserViewModel model)
+        public async Task<UserViewModel> FindByNameAsync(string username)
         {
-            if(!_modelState.IsValid)
+            var user = await _users.GetUserByNameAsync(username);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException("The user does not exist");
+            }
+
+            var viewModel = new UserViewModel
+            {
+                Username = user.UserName,
+                Email = user.Email,
+                DisplayName = user.DisplayName
+            };
+
+            return viewModel;
+        }
+
+        public IEnumerable<CmsUser> GetAllUsers()
+        {
+            return _users.GetAllUsers();
+        }
+
+        public async Task<bool> CreateAsync(UserViewModel model)
+        {
+            if (!_modelState.IsValid)
             {
                 return false;
             }
 
-            if(string.IsNullOrWhiteSpace(model.NewPassword))
+            var existingUser = await _users.GetUserByNameAsync(model.Username);
+
+            if (existingUser != null)
+            {
+                _modelState.AddModelError(string.Empty, "The user already exists");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(model.NewPassword))
             {
                 _modelState.AddModelError(string.Empty, "You must provide a password");
+                return false;
             }
 
             var newUser = new CmsUser
@@ -43,8 +78,64 @@ namespace MvcCms.Areas.Admin.Services
                 UserName = model.Username
             };
 
-            _users.Create(newUser, model.NewPassword);
+            await _users.CreateAsync(newUser, model.NewPassword);
             return true;
+        }
+
+        public async Task<bool> EditAsync(UserViewModel model)
+        {
+            var user = await _users.GetUserByNameAsync(model.Username);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException("The user does not exist");
+            }
+
+            if (!_modelState.IsValid)
+            {
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(model.NewPassword))
+            {
+                if (string.IsNullOrWhiteSpace(model.CurrentPassword))
+                {
+                    _modelState.AddModelError(string.Empty, "The current password must be supplied");
+                    return false;
+                } 
+
+                var passwordVerified = _users.VerifyPassword(user.PasswordHash, model.CurrentPassword);
+
+                if (!passwordVerified)
+                {
+                    _modelState.AddModelError(string.Empty, "The current password does not match");
+                    return false;
+                }
+
+                var newHashedPassword = _users.HashPassword(model.NewPassword);
+                user.PasswordHash = newHashedPassword;
+            }
+
+            user.Email = model.Email;
+            user.DisplayName = model.DisplayName;
+
+            await _users.UpdateAsync(user);
+
+            return true;
+        }
+
+        public async Task DeleteAsync(string username)
+        {
+
+            var user = await _users.GetUserByNameAsync(username);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException("The user does not exist");
+            }
+
+            await _users.DeleteAsync(user);
+
         }
     }
 }
