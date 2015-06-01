@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Configuration;
 using Microsoft.AspNet.Identity;
 using MvcCms.Models;
 
@@ -53,6 +54,21 @@ namespace MvcCms.Data
         {
             return _manager.PasswordHasher.VerifyHashedPassword(passwordHash, currentPassword)
                     == PasswordVerificationResult.Success;
+        }
+
+        public async Task AddUserToRoleAsync(CmsUser user, string role)
+        {
+            await _manager.AddToRoleAsync(user.Id, role);
+        }
+
+        public async Task<IEnumerable<string>> GetRolesForUserAsync(CmsUser user)
+        {
+            return await _manager.GetRolesAsync(user.Id);
+        }
+
+        public async Task RemoveUserFromRoleAsync(CmsUser user, params string[] roleNames)
+        {
+            await _manager.RemoveFromRolesAsync(user.Id, roleNames);
         }
 
         private bool _disposed;

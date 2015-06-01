@@ -35,9 +35,10 @@ namespace MvcCms.Areas.Admin.Controllers
 
         [Route("create")]
         [HttpGet]
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
             var model = new UserViewModel();
+            model.LoadUserRoles(await _roleRepository.GetAllRolesAsync());
             return View(model);
         }
 

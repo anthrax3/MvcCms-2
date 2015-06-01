@@ -14,5 +14,8 @@ namespace MvcCms.Data
         Task UpdateAsync(CmsUser user);
         string HashPassword(string newPassword);
         bool VerifyPassword(string passwordHash, string currentPassword);
+        Task AddUserToRoleAsync(CmsUser newUser, string role);
+        Task<IEnumerable<string>> GetRolesForUserAsync(CmsUser user);
+        Task RemoveUserFromRoleAsync(CmsUser user, params string[] roleNames);
     }
 }

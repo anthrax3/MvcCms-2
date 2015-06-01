@@ -42,6 +42,12 @@ namespace MvcCms.Areas.Admin.Services
                 DisplayName = user.DisplayName
             };
 
+            var userRoles = await _users.GetRolesForUserAsync(user);
+            var enumerable = userRoles as string[] ?? userRoles.ToArray();
+            viewModel.SelectedRole = enumerable.Count() > 1 ? enumerable.FirstOrDefault() : enumerable.SingleOrDefault();
+
+            viewModel.LoadUserRoles(await _roles.GetAllRolesAsync());
+
             return viewModel;
         }
 
@@ -79,12 +85,15 @@ namespace MvcCms.Areas.Admin.Services
             };
 
             await _users.CreateAsync(newUser, model.NewPassword);
+
+            await _users.AddUserToRoleAsync(newUser, model.SelectedRole);
+
             return true;
         }
 
         public async Task<bool> EditAsync(UserViewModel model)
         {
-            var user = await _users.GetUserByNameAsync(model.Username);
+            var user = await _users.GetUserByNameAsync(model.Username);            
 
             if (user == null)
             {
@@ -120,6 +129,11 @@ namespace MvcCms.Areas.Admin.Services
             user.DisplayName = model.DisplayName;
 
             await _users.UpdateAsync(user);
+
+            var roles = await _users.GetRolesForUserAsync(user);
+            await _users.RemoveUserFromRoleAsync(user, roles.ToArray());
+
+            await _users.AddUserToRoleAsync(user, model.SelectedRole);
 
             return true;
         }
