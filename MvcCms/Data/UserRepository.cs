@@ -17,7 +17,7 @@ namespace MvcCms.Data
         public UserRepository()
         {
             _store = new CmsUserStore();
-            _manager = new CmsUserManager();
+            _manager = new CmsUserManager(_store);
         }
 
         public async Task<CmsUser> GetUserByNameAsync(string username)
