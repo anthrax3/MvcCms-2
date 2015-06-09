@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using MvcCms.Models;
@@ -17,5 +18,7 @@ namespace MvcCms.Data
         Task AddUserToRoleAsync(CmsUser newUser, string role);
         Task<IEnumerable<string>> GetRolesForUserAsync(CmsUser user);
         Task RemoveUserFromRoleAsync(CmsUser user, params string[] roleNames);
+        Task<CmsUser> GetLoginUserAsync(string username, string password);
+        Task<ClaimsIdentity> CreateIdentityAsync(CmsUser user);
     }
 }
