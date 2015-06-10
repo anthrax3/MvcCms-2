@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using Microsoft.AspNet.Identity;
 using MvcCms.Data;
 using MvcCms.Models;
 
@@ -11,26 +13,37 @@ namespace MvcCms.Areas.Admin.Controllers
     // /admin/post
     [RouteArea("Admin")]
     [RoutePrefix("post")]
+    [Authorize]
     public class PostController : Controller
     {
         private readonly IPostRepository _repository;
+        private readonly IUserRepository _users;
 
         public PostController() : 
-            this(new PostRepository())
+            this(new PostRepository(), new UserRepository())
         {
             
         }
 
-        public PostController(IPostRepository repository)
+        public PostController(IPostRepository repository, IUserRepository userRepository)
         {
             _repository = repository;
+            _users = userRepository;
         }
 
         // GET: Admin/Post
         [Route("")]
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            var posts = _repository.GetAll();
+            if(!User.IsInRole("author"))
+            {
+                var allPosts = _repository.GetAllAsync();
+                return View(allPosts);   
+            }
+
+            var user = await GetLoggedInUser();
+            var posts = await _repository.GetPostsByAuthorAsync(user.Id);
+
             return View(posts);
         }
 
@@ -46,12 +59,14 @@ namespace MvcCms.Areas.Admin.Controllers
         [HttpPost]
         [Route("create")]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Post model)
+        public async Task<ActionResult> Create(Post model)
         {
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
+
+            var user = await GetLoggedInUser();
 
             if (string.IsNullOrWhiteSpace(model.Id))
             {
@@ -61,7 +76,7 @@ namespace MvcCms.Areas.Admin.Controllers
             model.Id = model.Id.MakeUrlFriendly();
             model.Tags = model.Tags.Select(t => t.MakeUrlFriendly()).ToList();
             model.Created = DateTime.Now;
-            model.AuthorId = "e31095c2-382f-4a8a-975d-33e809b2da84";
+            model.AuthorId = user.Id;
 
             try
             {
@@ -79,13 +94,22 @@ namespace MvcCms.Areas.Admin.Controllers
         // /admin/post/edit/post-to-edit
         [HttpGet]
         [Route("edit/{postId}")]
-        public ActionResult Edit(string postId)
+        public async Task<ActionResult> Edit(string postId)
         {                      
             var post = _repository.Get(postId);
 
             if(post == null)
             {
                 return HttpNotFound();
+            }
+
+            if(User.IsInRole("author"))
+            {
+                var user = await GetLoggedInUser();
+                if(post.AuthorId != user.Id)
+                {
+                    return new HttpUnauthorizedResult();
+                }
             }
 
             return View(post);
@@ -95,11 +119,21 @@ namespace MvcCms.Areas.Admin.Controllers
         [HttpPost]
         [Route("edit/{postId}")]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(string postId, Post model)
+        public async Task<ActionResult> Edit(string postId, Post model)
         {            
             if(!ModelState.IsValid)
             {
                 return View(model);
+            }
+
+            if (User.IsInRole("author"))
+            {
+                var user = await GetLoggedInUser();
+                var post = _repository.Get(postId);
+                if (post != null && post.AuthorId != user.Id)
+                {
+                    return new HttpUnauthorizedResult();
+                }
             }
 
             if (string.IsNullOrWhiteSpace(model.Id))
@@ -129,6 +163,7 @@ namespace MvcCms.Areas.Admin.Controllers
 
         [HttpGet]
         [Route("delete/{postId}")]
+        [Authorize(Roles = "admin, editor")]
         public ActionResult Delete(string postId)
         {            
             var post = _repository.Get(postId);
@@ -145,6 +180,7 @@ namespace MvcCms.Areas.Admin.Controllers
         [HttpPost]
         [Route("delete/{postId}")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin, editor")]
         public ActionResult Delete(string postId, string dummy)
         {            
             try
@@ -157,6 +193,24 @@ namespace MvcCms.Areas.Admin.Controllers
             {
                 return HttpNotFound();
             }            
+        }
+
+        private async Task<CmsUser> GetLoggedInUser()
+        {
+            return await _users.GetUserByNameAsync(User.Identity.Name);
+        }
+
+        private bool _isDisposed;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (_isDisposed)
+            {
+                _users.Dispose();                
+            }
+
+            _isDisposed = true;
+            base.Dispose(disposing);
         }
     }
 }
