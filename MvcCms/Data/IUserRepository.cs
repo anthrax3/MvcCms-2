@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -6,7 +7,7 @@ using MvcCms.Models;
 
 namespace MvcCms.Data
 {
-    public interface IUserRepository
+    public interface IUserRepository : IDisposable
     {
         Task<CmsUser> GetUserByNameAsync(string username);
         IEnumerable<CmsUser> GetAllUsers();
