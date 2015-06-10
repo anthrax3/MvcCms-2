@@ -13,6 +13,7 @@ namespace MvcCms.Areas.Admin.Controllers
 {
     [RouteArea("admin")]
     [RoutePrefix("user")]
+    [Authorize]
     public class UserController : Controller
     {
         private readonly UserRepository _userRepository;
@@ -27,6 +28,7 @@ namespace MvcCms.Areas.Admin.Controllers
         }
 
         [Route("")]
+        [Authorize(Roles = "admin")]
         public ActionResult Index()
         {
             var users = _users.GetAllUsers();
@@ -35,6 +37,7 @@ namespace MvcCms.Areas.Admin.Controllers
 
         [Route("create")]
         [HttpGet]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> Create()
         {
             var model = new UserViewModel();
@@ -45,6 +48,7 @@ namespace MvcCms.Areas.Admin.Controllers
         [Route("create")]
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> Create(UserViewModel model)
         {
             if (await _users.CreateAsync(model))
@@ -57,8 +61,16 @@ namespace MvcCms.Areas.Admin.Controllers
 
         [Route("edit/{username}")]
         [HttpGet]
+        [Authorize(Roles = "admin, editor, author")]
         public async Task<ActionResult> Edit(string username)
         {
+            var currentUser = User.Identity.Name;
+            if(!User.IsInRole("admin") 
+                && !string.Equals(currentUser, username, StringComparison.CurrentCultureIgnoreCase))
+            {
+                return new HttpUnauthorizedResult();
+            }
+
             try
             {
                 var user = await _users.FindByNameAsync(username);
@@ -75,15 +87,24 @@ namespace MvcCms.Areas.Admin.Controllers
         [Route("edit/{username}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(UserViewModel model)
+        [Authorize(Roles = "admin, editor, author")]
+        public async Task<ActionResult> Edit(UserViewModel model, string username)
         {
+            var currentUser = User.Identity.Name;
+            var isAdmin = User.IsInRole("admin");
+            if (!isAdmin
+                && !string.Equals(currentUser, username, StringComparison.CurrentCultureIgnoreCase))
+            {
+                return new HttpUnauthorizedResult();
+            }
+
             try
             {
                 if (await _users.EditAsync(model))
                 {
-                    return RedirectToAction("index");
+                    return isAdmin ? RedirectToAction("index") : RedirectToAction("index", "admin");
                 }
-                
+
                 return View(model);
             }
             catch (KeyNotFoundException)
@@ -95,6 +116,7 @@ namespace MvcCms.Areas.Admin.Controllers
         [Route("delete/{username}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> Delete(string username)
         {
             try
