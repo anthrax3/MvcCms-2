@@ -129,6 +129,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="css\bootstrap.min.css" />
+    <Content Include="css\Site.css" />
     <Content Include="Global.asax" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -141,6 +143,7 @@
     <Compile Include="Areas\Admin\Controllers\TagController.cs" />
     <Compile Include="Areas\Admin\Controllers\UserController.cs" />
     <Compile Include="Areas\Admin\Services\UserService.cs" />
+    <Compile Include="Areas\Admin\ViewModels\AdminMenuItem.cs" />
     <Compile Include="Areas\Admin\ViewModels\LoginViewModel.cs" />
     <Compile Include="Areas\Admin\ViewModels\UserViewModel.cs" />
     <Compile Include="Data\CmsContext.cs" />
@@ -183,6 +186,8 @@
     <Content Include="Areas\Admin\Views\User\Create.cshtml" />
     <Content Include="Areas\Admin\Views\Admin\Login.cshtml" />
     <Content Include="Areas\Admin\Views\Admin\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Admin\AdminMenu.cshtml" />
+    <Content Include="Areas\Admin\Views\Admin\_menuLink.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

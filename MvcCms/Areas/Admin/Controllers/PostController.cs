@@ -37,7 +37,7 @@ namespace MvcCms.Areas.Admin.Controllers
         {
             if(!User.IsInRole("author"))
             {
-                var allPosts = _repository.GetAllAsync();
+                var allPosts = await _repository.GetAllAsync();
                 return View(allPosts);   
             }
 
