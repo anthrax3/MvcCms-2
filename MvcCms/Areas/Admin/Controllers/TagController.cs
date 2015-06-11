@@ -9,7 +9,7 @@ namespace MvcCms.Areas.Admin.Controllers
 {
     [RouteArea("Admin")]
     [RoutePrefix("tag")]
-    [Authorize(Roles = "admin, editor")]
+    [Authorize]
     public class TagController : Controller
     {
         private readonly ITagRepository _repository;
@@ -25,15 +25,27 @@ namespace MvcCms.Areas.Admin.Controllers
 
         // GET: Admin/Tag
         [Route("")]
+
         public ActionResult Index()
         {
             var tags = _repository.GetAll();
+
+            if(Request.AcceptTypes.Contains("application/json"))
+            {
+                return Json(tags, JsonRequestBehavior.AllowGet);
+            }
+
+            if(User.IsInRole("author"))
+            {
+                return new HttpUnauthorizedResult();
+            }
 
             return View(tags);
         }
 
         [HttpGet]
         [Route("edit/{tag}")]
+        [Authorize(Roles = "admin, editor")]
         public ActionResult Edit(string tag)
         {
             try
@@ -50,6 +62,7 @@ namespace MvcCms.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("edit/{tag}")]
+        [Authorize(Roles = "admin, editor")]
         public ActionResult Edit(string tag, string newTag)
         {
             var tags = _repository.GetAll();
@@ -79,6 +92,7 @@ namespace MvcCms.Areas.Admin.Controllers
 
         [HttpGet]
         [Route("delete/{tag}")]
+        [Authorize(Roles = "admin, editor")]
         public ActionResult Delete(string tag)
         {
             try
@@ -95,6 +109,7 @@ namespace MvcCms.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("delete/{tag}")]
+        [Authorize(Roles = "admin, editor")]
         public ActionResult Delete(string tag, string foo)
         {
             try

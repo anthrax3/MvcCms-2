@@ -10,6 +10,7 @@
 <p>
     @Html.ActionLink("Create New", "Create")
 </p>
+@AntiForgery.GetHtml()
 <table class="table">
     <tr>
         <th>
@@ -37,7 +38,8 @@
         </td>
         <td>
             @Html.ActionLink("Edit", "Edit", new { username = item.UserName }) |            
-            @Html.ActionLink("Delete", "Delete", new { username = item.UserName })
+            @Html.ActionLink("Delete", "Delete", new { username = item.UserName },
+                new {data_action="delete", data_value=item.UserName})
         </td>
     </tr>
 }

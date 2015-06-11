@@ -2,14 +2,14 @@
 
 @{
     ViewBag.Title = "Index";
-    Layout = "~/Areas/Admin/Views/Post/_PostLayout.cshtml";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
 <h2>Index</h2>
-
-@*<p>
-    @Html.ActionLink("Create New", "Create")
-</p>*@
+ <p>
+    @Html.ActionLink("Create a new Post", "create", "post", new { Area = "admin" })
+</p>
+@AntiForgery.GetHtml()
 <table class="table">
     <tr>
         <th>
@@ -43,7 +43,8 @@
         </td>
         <td>
             @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |            
-            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+            @Html.ActionLink("Delete", "Delete", new { id = item.Id }, 
+                new { data_action = "delete", data_value = item.Title })
         </td>
     </tr>
 }
