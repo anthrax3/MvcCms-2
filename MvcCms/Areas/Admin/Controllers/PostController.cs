@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -21,8 +22,7 @@ namespace MvcCms.Areas.Admin.Controllers
 
         public PostController() : 
             this(new PostRepository(), new UserRepository())
-        {
-            
+        {            
         }
 
         public PostController(IPostRepository repository, IUserRepository userRepository)
@@ -33,16 +33,18 @@ namespace MvcCms.Areas.Admin.Controllers
 
         // GET: Admin/Post
         [Route("")]
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> Index(string searchString)
         {
+            IEnumerable<Post> posts;
             if(!User.IsInRole("author"))
             {
-                var allPosts = await _repository.GetAllAsync();
-                return View(allPosts);   
+                posts = await GetAllPosts(searchString);                
             }
-
-            var user = await GetLoggedInUser();
-            var posts = await _repository.GetPostsByAuthorAsync(user.Id);
+            else
+            {
+                var user = await GetLoggedInUser();
+                posts = await GetAllPosts(searchString, user.Id);                
+            }            
 
             return View(posts);
         }
@@ -200,13 +202,44 @@ namespace MvcCms.Areas.Admin.Controllers
             return await _users.GetUserByNameAsync(User.Identity.Name);
         }
 
+        private async Task<IEnumerable<Post>> GetAllPosts(string searchString, string userId = null)
+        {
+            IEnumerable<Post> posts;
+            if(string.IsNullOrWhiteSpace(searchString))
+            {
+                if(userId == null)
+                {
+                    posts = await _repository.GetAllAsync();
+                }
+                else
+                {
+                    posts = await _repository.GetPostsByAuthorAsync(userId);
+                }
+            }
+            else
+            {
+                Expression<Func<Post, bool>> predicate = p => p.Title.Contains(searchString);
+                if(userId == null)
+                {
+                    posts = await _repository.GetAllAsync(predicate);
+                }
+                else
+                {
+                    posts = await _repository.GetPostsByAuthorAsync(userId, predicate);
+                }                
+            }
+
+            return posts;
+        }
+
         private bool _isDisposed;
 
         protected override void Dispose(bool disposing)
         {
             if (_isDisposed)
             {
-                _users.Dispose();                
+                _users.Dispose(); 
+                _repository.Dispose();
             }
 
             _isDisposed = true;

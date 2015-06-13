@@ -10,7 +10,7 @@ using MvcCms.Models;
 
 namespace MvcCms.Data
 {
-    public class UserRepository : IUserRepository, IDisposable
+    public class UserRepository : IUserRepository
     {
         private readonly CmsUserStore _store;
         private readonly CmsUserManager _manager;

@@ -6,9 +6,16 @@
 }
 
 <h2>Index</h2>
- <p>
-    @Html.ActionLink("Create a new Post", "create", "post", new { Area = "admin" })
+<p>
+    @Html.ActionLink("Create a new Post", "create", "post", new {Area = "admin"})
 </p>
+
+@using(Html.BeginForm())
+{
+    <p>Find by name: @Html.TextBox("searchString")
+        <input type="submit" value="Search" /></p>
+}
+
 @AntiForgery.GetHtml()
 <table class="table">
     <tr>
