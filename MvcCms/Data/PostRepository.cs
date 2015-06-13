@@ -10,11 +10,12 @@ namespace MvcCms.Data
 {
     public class PostRepository : IPostRepository
     {
-        public Post Get(string id)
+        public async Task<Post> GetAsync(string id)
         {
             using (var db = new CmsContext())
             {
-                return db.Posts.Include("Author").SingleOrDefault(post => post.Id == id);
+                return await db.Posts.Include("Author")
+                                     .SingleOrDefaultAsync(post => post.Id == id);
             }
         }
 
@@ -88,6 +89,31 @@ namespace MvcCms.Data
                                      .Where(p => p.AuthorId == authorId)
                                      .OrderByDescending(p => p.Created).ToArrayAsync();
             }
-        }        
+        }
+
+        public async Task<IEnumerable<Post>> GetPublishedPostsAsync()
+        {
+            using(var db = new CmsContext())
+            {
+                return await db.Posts.Include("Author")
+                                     .Where(p => p.Published < DateTime.Now)
+                                     .OrderByDescending(p => p.Published)
+                                     .ToArrayAsync();
+            }
+        }
+
+        public async Task<IEnumerable<Post>> GetPostsByTagAsync(string tagId)
+        {
+            using(var db = new CmsContext())
+            {
+                var posts = await db.Posts.Include("Author")
+                              .Where(p => p.CombinedTags.Contains(tagId))
+                              .ToListAsync();
+
+                return posts.Where(p =>
+                            p.Tags.Contains(tagId, StringComparer.CurrentCultureIgnoreCase))
+                                  .ToList();
+            }
+        }
     }
 }

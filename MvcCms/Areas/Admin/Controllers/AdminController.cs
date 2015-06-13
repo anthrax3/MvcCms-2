@@ -50,6 +50,11 @@ namespace MvcCms.Areas.Admin.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> Login(LoginViewModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
             var user = await _users.GetLoginUserAsync(model.Username, model.Password);
             if(user == null)
             {
@@ -73,7 +78,7 @@ namespace MvcCms.Areas.Admin.Controllers
             var authManager = HttpContext.GetOwinContext().Authentication;
             authManager.SignOut();
 
-            return RedirectToAction("index", "home");
+            return RedirectToAction("index", "home", new {area = ""});
         }
 
         [AllowAnonymous]

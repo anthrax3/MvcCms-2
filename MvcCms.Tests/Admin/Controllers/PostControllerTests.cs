@@ -22,7 +22,7 @@ namespace MvcCms.Tests.Admin.Controllers
             var userRepo = Mock.Create<IUserRepository>();
             var controller = new PostController(repo, userRepo);
 
-            Mock.Arrange(() => repo.Get(id))
+            Mock.Arrange(() => repo.GetAsync(id).Result)
                 .Returns(new Post {Id = id});
 
             var result = (ViewResult) await controller.Edit(id);
@@ -39,7 +39,7 @@ namespace MvcCms.Tests.Admin.Controllers
             var userRepo = Mock.Create<IUserRepository>();
             var controller = new PostController(repo, userRepo);
 
-            Mock.Arrange(() => repo.Get(id))
+            Mock.Arrange(() => repo.GetAsync(id).Result)
                 .Returns((Post)null);
 
             var result = await controller.Edit(id);            
@@ -71,7 +71,7 @@ namespace MvcCms.Tests.Admin.Controllers
             var userRepo = Mock.Create<IUserRepository>();
             var controller = new PostController(repo, userRepo);
 
-            Mock.Arrange(() => repo.Get(id))
+            Mock.Arrange(() => repo.GetAsync(id).Result)
                 .Returns(new Post { Id = id });
 
             controller.ViewData.ModelState.AddModelError("key", "error message");

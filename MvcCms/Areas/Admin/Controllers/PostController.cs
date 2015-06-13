@@ -96,7 +96,7 @@ namespace MvcCms.Areas.Admin.Controllers
         [Route("edit/{postId}")]
         public async Task<ActionResult> Edit(string postId)
         {                      
-            var post = _repository.Get(postId);
+            var post = await _repository.GetAsync(postId);
 
             if(post == null)
             {
@@ -129,7 +129,7 @@ namespace MvcCms.Areas.Admin.Controllers
             if (User.IsInRole("author"))
             {
                 var user = await GetLoggedInUser();
-                var post = _repository.Get(postId);
+                var post = await _repository.GetAsync(postId);
                 if (post != null && post.AuthorId != user.Id)
                 {
                     return new HttpUnauthorizedResult();
@@ -164,9 +164,9 @@ namespace MvcCms.Areas.Admin.Controllers
         [HttpGet]
         [Route("delete/{postId}")]
         [Authorize(Roles = "admin, editor")]
-        public ActionResult Delete(string postId)
+        public async Task<ActionResult> Delete(string postId)
         {            
-            var post = _repository.Get(postId);
+            var post = await _repository.GetAsync(postId);
 
             if (post == null)
             {

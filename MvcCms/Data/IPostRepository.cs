@@ -9,11 +9,13 @@ namespace MvcCms.Data
 {
     public interface IPostRepository
     {
-        Post Get(string id);
+        Task<Post> GetAsync(string id);
         void Edit(string id, Post updatedItem);
         void Create(Post model);
         void Delete(string id);
         Task<IEnumerable<Post>> GetAllAsync();
         Task<IEnumerable<Post>> GetPostsByAuthorAsync(string authorId);
+        Task<IEnumerable<Post>> GetPublishedPostsAsync();
+        Task<IEnumerable<Post>>  GetPostsByTagAsync(string tagId);
     }
 }
